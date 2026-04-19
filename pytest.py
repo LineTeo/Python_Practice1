@@ -68,7 +68,7 @@ for year in years:
     else:
     #    population_trend.append(None)
     #    print(f"{year}年のデータに {target_city} は見つかりませんでした。")
-        for lst in [total_pop_trend, male_pop_trend, female_pop_trend]:
+        for lst in [population_trend, male_pop_trend, female_pop_trend]:
             lst.append(None)
 
 # --- グラフの描画 ---
