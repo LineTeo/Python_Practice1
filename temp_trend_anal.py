@@ -63,11 +63,11 @@ temp_filtered = np.fft.ifft(y_temp_fft_filtered).real
 # --- 4-1. 各暦日(1-365)の最大値を取得 ---
 # dfに 'day_of_year' カラムを作成（1～365/366の値）
 df['day_of_year'] = pd.to_datetime(df['date']).dt.dayofyear
-max_sunshine_by_day = df.groupby('day_of_year')['sunshine'].max()
+max_df = df.groupby('day_of_year')['sunshine'].max().reset_index()
 
 # x（1-365日）, y（その日の最大日照）
-x_data = max_sunshine_by_day.index.values
-y_data = max_sunshine_by_day.values
+x_data = max_df['day_of_year'].values
+y_data = max_df['sunshine'].values
 
 # --- 4-2. サインカーブのフィッティング関数定義 ---
 def sin_func(x, a, b, c, d):
@@ -83,10 +83,14 @@ params, _ = curve_fit(sin_func, x_data, y_data, p0=initial_guess)
 df['sun_ideal'] = sin_func(df['day_of_year'], *params)
 
 # --- 4-4. 日照偏差（Residual）の算出 ---
-# 実際の日照から、理論上の快晴日照を引く
-# これにより「季節性」が完璧に排除された「その日の晴れ具合」が出る
-df['sun_deviation'] = df['sunshine'] - df['sun_ideal']
-sun_filtered= df['sun_deviation'].values
+# 理論上の最大値に対する実際の日照時間の割合を計算
+df['sun_ratio'] = df['sunshine'] / df['sun_ideal']
+# 【重要】物理的な補正
+# 1. フィッティングの誤差で100%をわずかに超える場合があるため、1.0（100%）を上限とする
+df['sun_ratio'] = df['sun_ratio'].clip(upper=1.0)
+
+# 2. 夜間や理論値が極端に小さい日のノイズを除去（例：理論値が1時間以下の日は0とするなど）
+df.loc[df['sun_ideal'] < 0.5, 'sun_ratio'] = 0
 
 # --- 5. 重回帰分析による気象要因（日照・雨量・風速）の除去 ---
 
@@ -94,7 +98,7 @@ sun_filtered= df['sun_deviation'].values
 # 1. 季節除去済み日照, 2. 雨量(そのもの), 3. 風速(そのもの)
 # 雨量や風速はもともと季節周期性が気温ほど支配的ではないため、そのまま使用します。
 X_features = np.column_stack([
-    sun_filtered, 
+    df['sun_ratio'].values, 
     df['rain'].fillna(0).values, 
     df['wind'].fillna(0).values
 ])
@@ -149,7 +153,7 @@ plt.legend()
 
 # 日照データとフィッティング結果の表示
 plt.subplot(2, 2, 2)
-plt.scatter(x_data, y_data, label='Max Sunshine by Day', color='blue', s=10)
+plt.scatter(x_data, df['sun_ideal'].values, label='Max Sunshine by Day', color='blue', s=10)
 x_fit = np.linspace(1, 365, 1000)
 y_fit = sin_func(x_fit, *params)
 plt.plot(x_fit, y_fit, label='Fitted Sin Curve', color='red')
@@ -168,8 +172,8 @@ plt.ylabel("Temperature")
 plt.legend()
 
 plt.subplot(2, 2, 4)
-plt.plot(df['date'], y_sun, label='Original', alpha=0.5)
-plt.plot(df['date'], sun_filtered, label='Filtered (Seasonal removed)', color='red')
+#plt.plot(df['date'], y_sun, label='Original', alpha=0.5)
+plt.plot(df['date'], df['sun_ratio'], label='Filtered (Seasonal removed)', color='red')
 plt.title("Original vs Seasonal Removed")
 plt.xlabel("Date")
 plt.ylabel("Sunshine")
