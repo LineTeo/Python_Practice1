@@ -87,7 +87,7 @@ df['sun_ideal'] = sin_func(df['day_of_year'], *params)
 df['sun_ratio'] = df['sunshine'] / df['sun_ideal']
 # 【重要】物理的な補正
 # 1. フィッティングの誤差で100%をわずかに超える場合があるため、1.0（100%）を上限とする
-df['sun_ratio'] = df['sun_ratio'].clip(upper=1.0)
+# df['sun_ratio'] = df['sun_ratio'].clip(upper=1.0)
 
 # 2. 夜間や理論値が極端に小さい日のノイズを除去（例：理論値が1時間以下の日は0とするなど）
 df.loc[df['sun_ideal'] < 0.5, 'sun_ratio'] = 0
@@ -153,7 +153,7 @@ plt.legend()
 
 # 日照データとフィッティング結果の表示
 plt.subplot(2, 2, 2)
-plt.scatter(x_data, df['sun_ideal'].values, label='Max Sunshine by Day', color='blue', s=10)
+plt.scatter(x_data, y_data, label='Max Sunshine by Day', color='blue', s=10)
 x_fit = np.linspace(1, 365, 1000)
 y_fit = sin_func(x_fit, *params)
 plt.plot(x_fit, y_fit, label='Fitted Sin Curve', color='red')
@@ -183,7 +183,6 @@ plt.tight_layout()
 plt.show()
 
 # --- 8. 結果の可視化と出力 ---
-plt.figure(figsize=(12, 8))
 
 plt.figure(figsize=(12, 6))
 plt.plot(df.index, residual, label='Residual (De-seasoned & De-weathered)', color='gray', alpha=0.5)
