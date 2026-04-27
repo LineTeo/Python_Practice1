@@ -50,7 +50,7 @@ Python 学習で作成したプログラムです。
   </tr>
   <tr>
     <td>
-      <b>ClimateAnal.zip</b><br>
+      <b>Climate_project.zip</b><br>
       Dockerを使ったコンテナ化<br>
       Dockerがインストールしてあれば、Pythonが入って無くとも実行可能になる
       解凍してできたフォルダの中で
