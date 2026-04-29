@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>翻訳クイズ</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; }
+        #question { font-size: 48px; margin-bottom: 20px; }
+        input { font-size: 24px; padding: 8px; }
+        button { font-size: 24px; padding: 8px 20px; margin-left: 10px; }
+        #result { font-size: 24px; margin-top: 20px; }
+        #score { font-size: 18px; color: gray; }
+    </style>
+</head>
+<body>
+    <h1>翻訳クイズ</h1>
+    <div id="question">読み込み中...</div>
+    <input type="text" id="answer" placeholder="英語で入力">
+    <button onclick="submit()">解答</button>
+    <div id="result"></div>
+    <div id="score"></div>
+
+    <script>
+        let currentId = null;
+        let score = 0;
+        let total = 0;
+
+        async function loadQuestion() {
+            const res = await fetch("/api/question");
+            const data = await res.json();
+            currentId = data.id;
+            document.getElementById("question").textContent = data.japanese;
+            document.getElementById("answer").value = "";
+            document.getElementById("result").textContent = "";
+            document.getElementById("answer").focus();
+        }
+
+        async function submit() {
+            if (!currentId) return;
+            const answer = document.getElementById("answer").value;
+
+            const res = await fetch("/api/answer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: currentId, answer })
+            });
+            const data = await res.json();
+            total++;
+            if (data.correct) {
+                score++;
+                document.getElementById("result").textContent = "✅ 正解！";
+            } else {
+                document.getElementById("result").textContent = `❌ 不正解。正解は「${data.answer}」`;
+            }
+            document.getElementById("score").textContent = `スコア: ${score} / ${total}`;
+
+            // 1秒後に次の問題へ
+            setTimeout(loadQuestion, 1000);
+        }
+
+        // Enterキーで解答
+        document.addEventListener("keydown", e => {
+            if (e.key === "Enter") submit();
+        });
+
+        loadQuestion();
+    </script>
+</body>
+</html>

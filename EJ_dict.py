@@ -7,7 +7,7 @@ word = {
   "りんご": "apple",
   "ねこ": "cat",
   "いぬ": "dog",
-  "ありがとう": "thanks",
+  "辞書": "dictionary",
  }
 
 # 単語のキーを問題として順に表示させるために、キーだけリストにして、現在の単語のインデックスとスコアを初期化
@@ -40,17 +40,23 @@ def check_answer():
         messagebox.showinfo("終了", f"ゲーム終了！あなたのスコアは {score} / {len(word)} です。")
         root.destroy()  
 
+# --- GUIのセットアップ ---
 root = tk.Tk()
 root.title("翻訳アプリ")
 root.geometry("300x200")
 
+# 最初の問題を表示するラベル
 label=tk.Label(root, text=word_keys[current_word], font=("Arial", 24))
 label.pack(pady=20)
+
+# ユーザーが解答を入力するエントリーウィジェットを配置し、Enterキーで解答をチェックできるようにバインド
 entry=tk.Entry(root, font=("Arial", 14))
 entry.pack(pady=10)
 entry.bind("<Return>", lambda event: check_answer()) 
 
+# 解答をチェックするボタンも配置 
 button=tk.Button(root, text="解答", command=check_answer)
 button.pack()
 
+# GUIのメインループを開始
 root.mainloop()
