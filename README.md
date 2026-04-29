@@ -92,3 +92,35 @@ Python 学習で作成したプログラムです。
 ## データの出典
   気象庁 過去の気象データ  
 https://www.data.jma.go.jp/stats/etrn/index.php
+
+# 3.その他の演習プログラム
+| ソース名 | 概要 |
+|---|---|
+| EJ_dict.py| 日本語を表示して英単語を書かせる。tkinterと辞書の使い方演習 |
+| app.py<br> database.py<br> index.html| 上記プログラムをWebアプリ化。flask演習 |
+
+## インストールしたパッケージ
+| パッケージ名 | 目的 |
+|---|---|
+| flask |Webアプリケーションフレームワーク |
+
+### ローカル環境でのWeb アプリ実行方法
+1.各ファイルを以下のように配置
+```
+./
+├── app.py
+├── database.py
+└── templates/
+   └── index.html
+```
+2.アプリ実行（初回起動時に `words.db` が自動生成されます）
+```
+python app.py
+```
+3.ブラウザアクセス
+```
+http://localhost:5000
+```
+
+
+
